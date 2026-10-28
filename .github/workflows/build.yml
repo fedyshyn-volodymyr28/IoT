@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-platformio-esp32
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio intelhex
+
+      - name: Compile examples/main.ino for ESP32
+        run: pio ci examples/main.ino --board esp32doit-devkit-v1 --build-dir build --keep-build-dir
+
+      # ESP32 builds produce a .bin image; convert it to Intel HEX at the app partition offset (0x10000)
+      - name: Collect firmware files
+        run: |
+          mkdir -p firmware
+          cp build/.pio/build/esp32doit-devkit-v1/firmware.bin build/.pio/build/esp32doit-devkit-v1/firmware.elf firmware/
+          bin2hex.py --offset=0x10000 firmware/firmware.bin firmware/firmware.hex
+          ls -l firmware
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp32doit-devkit-v1
+          path: firmware/
+          if-no-files-found: error
