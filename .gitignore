@@ -60,3 +60,7 @@ dkms.conf
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# Local CI build output
+build/
+firmware/
