@@ -25,7 +25,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install PlatformIO
-        run: pip install --upgrade platformio
+        run: pip install --upgrade platformio intelhex
 
       - name: Compile examples/main.ino for ESP32
         run: pio ci examples/main.ino --board esp32doit-devkit-v1 --build-dir build --keep-build-dir
@@ -35,8 +35,7 @@ jobs:
         run: |
           mkdir -p firmware
           cp build/.pio/build/esp32doit-devkit-v1/firmware.bin build/.pio/build/esp32doit-devkit-v1/firmware.elf firmware/
-          ~/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-objcopy \
-            -I binary -O ihex --change-addresses 0x10000 firmware/firmware.bin firmware/firmware.hex
+          bin2hex.py --offset=0x10000 firmware/firmware.bin firmware/firmware.hex
           ls -l firmware
 
       - name: Upload firmware artifact
