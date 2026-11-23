@@ -60,3 +60,6 @@ dkms.conf
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# Blynk and Wi-Fi credentials
+include/blynk_secrets.h
